@@ -154,13 +154,14 @@ public class RootEditState : State<GameManager>
 
     public override void OnEnter()
     {
+        Debug.Log("edit");
         base.OnEnter();
     }
 
     public override void OnExit()
     {
         base.OnExit();
-        PlayerController.Instance.currency -= 1;
+//        PlayerController.Instance.currency -= 1;
     }
 
     public override void OnUpdate()
@@ -214,7 +215,7 @@ public class RootEditState : State<GameManager>
             if (Input.GetMouseButtonDown(0) && canPlace)
             {
                 GameObject root = owner.pOwner.PlaceRoot();
-                root.GetComponent<Root>().StartRoot();
+                //root.GetComponent<Root>().StartRoot();
                 owner.pOwner.rootList.Add(root);
                 if (Input.GetKey(KeyCode.LeftControl))
                 {
