@@ -55,8 +55,10 @@ public class RootEmptyState : State<GameManager>
             if (Input.GetMouseButtonDown(0))
             {
                 lineRenderer.positionCount = 2;
-                Vector3 spawnPoint = new Vector3(ray.GetPoint(hit.distance).x, 0f, ray.GetPoint(hit.distance).z);
+                //dit is waar de lijn spawnt
+                Vector3 spawnPoint = new Vector3(ray.GetPoint(hit.distance).x, ray.GetPoint(hit.distance).y, ray.GetPoint(hit.distance).z);
                 lineRenderer.SetPosition(0, spawnPoint);
+                owner.pOwner.PlacePole(spawnPoint);
                 owner.SwitchState(typeof(RootEditState));
             }
 
@@ -122,7 +124,6 @@ public class BuildDefenses : State<GameManager>
                     //geef bij 1 het nr in van het gebouw dat je gaat bouwen.
                     GameObject building = owner.pOwner.PlaceBuilding(1, hit.point);
                     owner.pOwner.buildingsList.Add(building);
-                    //                Debug.Log("NU MAAK JE EEN GEBOUW DIE KAN DEFENDEN");
                 }
             }
         }
@@ -144,7 +145,7 @@ public class RootEditState : State<GameManager>
     protected FSM<GameManager> owner;
     LineRenderer lineRenderer;
 
-    bool canPlace;
+    bool canPlace, loopFinished;
 
     public RootEditState(FSM<GameManager> _owner)
     {
@@ -161,7 +162,7 @@ public class RootEditState : State<GameManager>
     public override void OnExit()
     {
         base.OnExit();
-//        PlayerController.Instance.currency -= 1;
+        //        PlayerController.Instance.currency -= 1;
     }
 
     public override void OnUpdate()
@@ -175,6 +176,8 @@ public class RootEditState : State<GameManager>
         if (Physics.Raycast(ray, out hit, 100f, owner.pOwner.playingField))
         {
             Vector3 p1 = lineRenderer.GetPosition(0);
+            //Debug.Log(p1);
+
             Vector3 p2 = ray.GetPoint(hit.distance);
             Vector3 dir = (p2 - p1).normalized;
 
@@ -183,32 +186,31 @@ public class RootEditState : State<GameManager>
             lineRenderer.sharedMaterial = owner.pOwner.lineMaterials[0];
             canPlace = true;
 
-            RaycastHit obstacleHit;
-            if (Physics.Raycast(ray, out obstacleHit, 100f, owner.pOwner.obstacle))
-            {
-                //Debug.Log(obstacleHit.collider.gameObject);
-                lineRenderer.sharedMaterial = owner.pOwner.lineMaterials[1];
-                canPlace = false;
-            }
             if (Physics.Raycast(p1, dir, (p2 - p1).magnitude, owner.pOwner.obstacle))
             {
                 lineRenderer.sharedMaterial = owner.pOwner.lineMaterials[1];
                 canPlace = false;
             }
-
-
+            if (Physics.Raycast(p1, dir, (p2 - p1).magnitude, owner.pOwner.FinishLoop))
+            {
+                //you can finish the loop here
+                Debug.Log("loop finished");
+                loopFinished = true;
+            }
+            else
+            {
+                loopFinished = false;
+            }
 
             if ((p2 - p1).magnitude > owner.pOwner.maxLength)
             {
 
                 Vector3 correctedPosition = p1 + (dir * owner.pOwner.maxLength);
-                correctedPosition.y = 0f;
 
                 lineRenderer.SetPosition(1, correctedPosition);
             }
             else
             {
-
                 lineRenderer.SetPosition(1, placePoint);
             }
 
@@ -217,12 +219,17 @@ public class RootEditState : State<GameManager>
                 GameObject root = owner.pOwner.PlaceRoot();
                 //root.GetComponent<Root>().StartRoot();
                 owner.pOwner.rootList.Add(root);
-                if (Input.GetKey(KeyCode.LeftControl))
+                if (!loopFinished)
                 {
-                    lineRenderer.SetPosition(0, placePoint);
+                    // Debug.Log("einde van de lijn " + lineRenderer.GetPosition(1));
+                    lineRenderer.SetPosition(0, lineRenderer.GetPosition(1));
+                    owner.pOwner.PlacePole(lineRenderer.GetPosition(1));
+                    // Debug.Log("klik positie " + placePoint);
                 }
                 else
                 {
+                    owner.pOwner.FirstPole.layer = 0;
+                    owner.pOwner.FirstPole = null;
                     owner.SwitchState(typeof(RootEmptyState));
                 }
             }
@@ -249,10 +256,10 @@ public class RootFightState : State<GameManager>
     public override void OnUpdate()
     {
         //if (Building1.instance != null)
-            // for (int i = 0; i < PauseMenu.Instance.towers.Count; i++)
-            // {
-            //     PauseMenu.Instance.towers[i].gameObject.GetComponent<Buildings>().CheckForEnemies();
-            // }
+        // for (int i = 0; i < PauseMenu.Instance.towers.Count; i++)
+        // {
+        //     PauseMenu.Instance.towers[i].gameObject.GetComponent<Buildings>().CheckForEnemies();
+        // }
 
         // if (DayCycle.Instance.isNight)
         // {

@@ -10,12 +10,14 @@ public class GameManager : MonoBehaviour
 
     [HideInInspector] public LineRenderer lineRenderer;
     [HideInInspector] public GameObject currentNode;
+    [HideInInspector] public GameObject FirstPole;
     public Material[] lineMaterials;
     public LayerMask rootSpawnArea;
     public LayerMask Tower;
     public LayerMask playingField;
     public LayerMask obstacle;
-    public GameObject rootPrefab;
+    public LayerMask FinishLoop;
+    public GameObject rootPrefab, Pole;
     public GameObject[] BuildingsList;
 
     public float pRootPoints
@@ -80,17 +82,47 @@ public class GameManager : MonoBehaviour
         Vector3 p1 = lineRenderer.GetPosition(0);
         Vector3 p2 = lineRenderer.GetPosition(1);
         Vector3 delta = p2 - p1;
-
         newRoot.transform.rotation = Quaternion.LookRotation(delta);
         newRoot.transform.Rotate(-90, 0, 0);
         newRoot.transform.position = (p1 + p2) / 2f;
+        newRoot.transform.position += new Vector3(0, 0.5f, 0);
+
         //dit zorgt ervoor dat de root zolang is als de distance tussen de muis en het groeipunt.
         Vector3 scale = newRoot.transform.localScale;
-        scale.y = delta.magnitude / 2f;
+        scale.y = delta.magnitude;
         newRoot.transform.localScale = scale;
 
         return newRoot;
     }
+    public GameObject PlacePole(Vector3 SpawnPos)
+    {
+        GameObject newPole = Instantiate(Pole);
+        newPole.transform.position = SpawnPos + new Vector3(0, 0.5f, 0);
+        if (FirstPole == null)
+        {
+            Debug.Log("lel");
+            FirstPole = newPole;
+            int layerIndex = (int)Mathf.Log(FinishLoop.value, 2);
+            FirstPole.layer = layerIndex;
+            return FirstPole;
+        }
+        return newPole;
+    }
+    int LayerMaskToLayer(LayerMask layerMask)
+    {
+        int layerNumber = 0;
+        int layer = layerMask.value;
+        while (layer > 0)
+        {
+            layer = layer >> 1;
+            layerNumber++;
+        }
+
+        // layerNumber will be the index+1 of the first layer set in the LayerMask
+        // because counting starts from 0
+        return layerNumber - 1;
+    }
+
 
     public GameObject PlaceBuilding(float BuildingType, Vector3 mousePos)
     {
@@ -98,7 +130,7 @@ public class GameManager : MonoBehaviour
 
         //offset toegevoegd omdat anders de building door de root heen spawned. dit zorgt voor problemen met de raycast.
         newBuilding.transform.position = mousePos + new Vector3(0, 1, 0);
-//        print(mousePos);
+        //        print(mousePos);
         return newBuilding;
     }
 
