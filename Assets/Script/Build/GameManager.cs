@@ -13,6 +13,7 @@ public class GameManager : MonoBehaviour
     [HideInInspector] public GameObject FirstPole;
     public Material[] lineMaterials;
     public LayerMask rootSpawnArea;
+    public float magnitude;
     public LayerMask Tower;
     public LayerMask playingField;
     public LayerMask obstacle;
@@ -100,7 +101,6 @@ public class GameManager : MonoBehaviour
         newPole.transform.position = SpawnPos + new Vector3(0, 0.5f, 0);
         if (FirstPole == null)
         {
-            Debug.Log("lel");
             FirstPole = newPole;
             int layerIndex = (int)Mathf.Log(FinishLoop.value, 2);
             FirstPole.layer = layerIndex;
@@ -108,21 +108,6 @@ public class GameManager : MonoBehaviour
         }
         return newPole;
     }
-    int LayerMaskToLayer(LayerMask layerMask)
-    {
-        int layerNumber = 0;
-        int layer = layerMask.value;
-        while (layer > 0)
-        {
-            layer = layer >> 1;
-            layerNumber++;
-        }
-
-        // layerNumber will be the index+1 of the first layer set in the LayerMask
-        // because counting starts from 0
-        return layerNumber - 1;
-    }
-
 
     public GameObject PlaceBuilding(float BuildingType, Vector3 mousePos)
     {

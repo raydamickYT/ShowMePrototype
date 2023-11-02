@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Assertions.Must;
 
 public class RootEmptyState : State<GameManager>
 {
@@ -185,7 +186,7 @@ public class RootEditState : State<GameManager>
 
             lineRenderer.sharedMaterial = owner.pOwner.lineMaterials[0];
             canPlace = true;
-
+            owner.pOwner.magnitude = (p2 - p1).magnitude;
             if (Physics.Raycast(p1, dir, (p2 - p1).magnitude, owner.pOwner.obstacle))
             {
                 lineRenderer.sharedMaterial = owner.pOwner.lineMaterials[1];
@@ -206,6 +207,8 @@ public class RootEditState : State<GameManager>
             {
 
                 Vector3 correctedPosition = p1 + (dir * owner.pOwner.maxLength);
+                Debug.Log("distance of lint " + (p1 - p2).magnitude);
+                Debug.Log("maxlength " + owner.pOwner.maxLength);
 
                 lineRenderer.SetPosition(1, correctedPosition);
             }
@@ -213,10 +216,10 @@ public class RootEditState : State<GameManager>
             {
                 lineRenderer.SetPosition(1, placePoint);
             }
-
             if (Input.GetMouseButtonDown(0) && canPlace)
             {
                 GameObject root = owner.pOwner.PlaceRoot();
+                owner.pOwner.pRootPoints -= (p1 - p2).magnitude;
                 //root.GetComponent<Root>().StartRoot();
                 owner.pOwner.rootList.Add(root);
                 if (!loopFinished)
