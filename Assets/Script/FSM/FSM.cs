@@ -4,17 +4,12 @@ using UnityEngine;
 
 public class FSM<T>
 {
-    public T pOwner 
-    { 
-        get; protected set; 
-    }
-
     private State<T> currentState;
     private Dictionary<System.Type, State<T>> allStates = new Dictionary<System.Type, State<T>>();
 
-    public void Initialize(T _owner)
+    public void Initialize()
     {
-        pOwner = _owner;
+        // heb deze gelaten voor het geval ik ooit nog iets wil initializen hier
     }
 
     public void AddState(State<T> _state)

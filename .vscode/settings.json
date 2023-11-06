@@ -53,5 +53,6 @@
         "Temp/":true
     },
     "dotnet.preferCSharpExtension": true,
-    "dotnet.defaultSolution": "ShowMePrototype.sln"
+    "dotnet.defaultSolution": "ShowMePrototype.sln",
+    "cmake.sourceDirectory": "D:/Gihub/ShowMePrototype/Library/PackageCache/com.unity.ide.visualstudio@2.0.18/Editor/COMIntegration/COMIntegration~"
 }

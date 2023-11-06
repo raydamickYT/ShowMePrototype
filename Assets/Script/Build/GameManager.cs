@@ -3,18 +3,16 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-//voegt automaitsch een component toe dat het game object nodig heeft. in dit geval de line renderer omdat de line render laat zien waar je de roots plaatst
+//voegt automatisch een component toe dat het game object nodig heeft. in dit geval de line renderer omdat de line render laat zien waar je de roots plaatst
 [RequireComponent(typeof(LineRenderer))]
 public class GameManager : MonoBehaviour
 {
 
     [HideInInspector] public LineRenderer lineRenderer;
-    [HideInInspector] public GameObject currentNode;
     [HideInInspector] public GameObject FirstPole;
     public Material[] lineMaterials;
     public LayerMask rootSpawnArea;
     public float magnitude;
-    public LayerMask Tower;
     public LayerMask playingField;
     public LayerMask obstacle;
     public LayerMask FinishLoop;
@@ -40,32 +38,27 @@ public class GameManager : MonoBehaviour
     private float rootPoints = 50f;
 
     [SerializeField]
-    [Range(0, 25)]
-    private float pointsToRootLengthDivider = 10f;
+    [Range(0, 2)]
+    private float pointsToRootLengthDivider = 1f;
 
     [HideInInspector] public float maxLength;
 
     FSM<GameManager> fsm;
 
     public List<GameObject> rootList = new List<GameObject>();
-    public List<GameObject> buildingsList = new List<GameObject>();
     private void Start()
     {
         lineRenderer = GetComponent<LineRenderer>();
         SetMaxLength();
 
         fsm = new FSM<GameManager>();
-        fsm.Initialize(this);
-        fsm.AddState(new RootEmptyState(fsm));
-        fsm.AddState(new RootEditState(fsm));
-        fsm.AddState(new RootFightState(fsm));
-        fsm.AddState(new BuildDefenses(fsm));
-        fsm.AddState(new NoFunds(fsm));
+        fsm.AddState(new RootEmptyState(fsm, this));
+        fsm.AddState(new RootEditState(fsm, this));
+        fsm.AddState(new NoFunds(fsm, this));
 
 
         fsm.SwitchState(typeof(RootEmptyState));
     }
-
 
     void Update()
     {
@@ -86,7 +79,7 @@ public class GameManager : MonoBehaviour
         newRoot.transform.rotation = Quaternion.LookRotation(delta);
         newRoot.transform.Rotate(-90, 0, 0);
         newRoot.transform.position = (p1 + p2) / 2f;
-        newRoot.transform.position += new Vector3(0, 0.5f, 0);
+        newRoot.transform.position += new Vector3(0, 0.3f, 0);
 
         //dit zorgt ervoor dat de root zolang is als de distance tussen de muis en het groeipunt.
         Vector3 scale = newRoot.transform.localScale;
@@ -98,7 +91,7 @@ public class GameManager : MonoBehaviour
     public GameObject PlacePole(Vector3 SpawnPos)
     {
         GameObject newPole = Instantiate(Pole);
-        newPole.transform.position = SpawnPos + new Vector3(0, 0.5f, 0);
+        newPole.transform.position = SpawnPos + new Vector3(0, 0.2f, 0);
         if (FirstPole == null)
         {
             FirstPole = newPole;
@@ -108,15 +101,5 @@ public class GameManager : MonoBehaviour
         }
         return newPole;
     }
-
-    public GameObject PlaceBuilding(float BuildingType, Vector3 mousePos)
-    {
-        GameObject newBuilding = Instantiate(BuildingsList[0]);
-
-        //offset toegevoegd omdat anders de building door de root heen spawned. dit zorgt voor problemen met de raycast.
-        newBuilding.transform.position = mousePos + new Vector3(0, 1, 0);
-        //        print(mousePos);
-        return newBuilding;
-    }
-
+    
 }
